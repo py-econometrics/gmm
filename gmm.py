@@ -34,11 +34,13 @@ class GMMEstimator:
                 self.W = np.eye(moments.shape[1])
             elif self.opt == "torch":
                 self.W = torch.eye(moments.shape[1])
+        msum = moments.sum(axis=0)
         if self.opt == "scipy":
-            return (1 / self.n) * moments.sum(axis=0).T @ self.W @ moments.sum(axis=0)
+            return (1 / self.n) * msum.T @ self.W @ msum
         elif self.opt == "torch":
             return (1 / self.n) * torch.matmul(
-                moments.sum(axis=0).T, torch.matmul(self.W, moments.sum(axis=0))
+                msum.unsqueeze(-1).T,
+                torch.matmul(self.W, msum),
             )
 
     def optimal_weighting_matrix(self, moments):
@@ -83,7 +85,7 @@ class GMMEstimator:
         try:
             self.Gamma = self.jacobian_moment_cond()
             self.vθ = np.linalg.inv(self.Gamma.T @ self.W @ self.Gamma)
-            self.std_errors = np.sqrt(self.n / (self.n - self.k) * np.diag(self.vθ))
+            self.std_errors = np.sqrt(self.n * np.diag(self.vθ))
         except:
             self.std_errors = None
 
@@ -94,7 +96,7 @@ class GMMEstimator:
         if self.opt == "scipy":  # Analytic Jacobian for linear IV; else use torch
             self.jac_est = -self.z.T @ self.x
         elif self.opt == "torch":
-            # forward mode automatic differentiation wrt 3rd arg (coef)
+            # forward mode automatic differentiation wrt 3rd arg (parameter vector)
             self.jac = torch.func.jacfwd(self.moment_cond, argnums=3)
             self.jac_est = (
                 self.jac(self.z, self.y, self.x, self.theta)
