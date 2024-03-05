@@ -34,13 +34,13 @@ class GMMEstimator:
                 self.W = np.eye(moments.shape[1])
             elif self.opt == "torch":
                 self.W = torch.eye(moments.shape[1])
-        msum = moments.sum(axis=0)
+        mavg = moments.mean(axis=0)
         if self.opt == "scipy":
-            return (1 / self.n) * msum.T @ self.W @ msum
+            return mavg.T @ self.W @mavg
         elif self.opt == "torch":
-            return (1 / self.n) * torch.matmul(
-                msum.unsqueeze(-1).T,
-                torch.matmul(self.W, msum),
+            return torch.matmul(
+                mavg.unsqueeze(-1).T,
+                torch.matmul(self.W, mavg),
             )
 
     def optimal_weighting_matrix(self, moments):
@@ -52,7 +52,11 @@ class GMMEstimator:
         elif self.opt == "torch":
             return torch.inverse((1 / self.n) * torch.matmul(moments.T, moments))
 
-    def fit(self, z, y, x, verbose=False):
+    def fit(self, z, y, x, verbose=False, fit_method=None):
+        if (
+            fit_method is None
+        ):  # sensible defaults; non-limited BFGS is faster for small problems
+            fit_method = "l-bfgs" if self.opt == "torch" else "L-BFGS-B"
         if self.opt == "scipy":
             self.z, self.y, self.x = z, y, x
             self.n, self.k = x.shape
@@ -60,7 +64,7 @@ class GMMEstimator:
             result = scipy.optimize.minimize(
                 self.gmm_objective,
                 x0=np.random.rand(self.k),
-                method="L-BFGS-B",
+                method=fit_method,
                 options={"disp": verbose},
             )
         elif self.opt == "torch":
@@ -75,7 +79,7 @@ class GMMEstimator:
                 np.random.rand(self.k), dtype=torch.float64, requires_grad=True
             )
             result = torchmin.minimize(
-                self.gmm_objective, beta_init, method="l-bfgs", tol=1e-5, disp=verbose
+                self.gmm_objective, beta_init, method=fit_method, tol=1e-5, disp=verbose
             )
             self.W = self.W.detach().numpy()
         # solution
