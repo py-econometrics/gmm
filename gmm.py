@@ -10,17 +10,17 @@ import torchmin
 
 class GMMEstimator:
     """Class to create GMM estimator using scipy or torch backend."""
-    def __new__(cls, moment_cond, weighting_matrix="optimal", opt="scipy"):
-        opt = opt.lower()
-        estimator = _BACKENDS.get(opt)
+    def __new__(cls, moment_cond, weighting_matrix="optimal", backend="scipy"):
+        backend = backend.lower()
+        estimator = _BACKENDS.get(backend)
         if estimator is None:
             raise ValueError(
-                f"Backend {opt} is not supported. "
+                f"Backend {backend} is not supported. "
                 f"Supported backend are: {list(_BACKENDS.keys())}"
             )
         return super(GMMEstimator, cls).__new__(estimator)
 
-    def __init__(self, moment_cond, weighting_matrix="optimal", opt="scipy"):
+    def __init__(self, moment_cond, weighting_matrix="optimal", backend="scipy"):
         self.moment_cond = moment_cond
         self.weighting_matrix = weighting_matrix
 
@@ -49,9 +49,9 @@ class GMMEstimator:
 class GMMEstimatorScipy(GMMEstimator):
     """Class to create GMM estimator using scipy"""
 
-    def __init__(self, moment_cond, weighting_matrix="optimal", opt="scipy"):
+    def __init__(self, moment_cond, weighting_matrix="optimal", backend="scipy"):
         """Generalized Method of Moments Estimator with Scipy"""
-        super().__init__(moment_cond, weighting_matrix, opt)
+        super().__init__(moment_cond, weighting_matrix, backend)
 
     def gmm_objective(self, beta):
         """
@@ -102,9 +102,9 @@ class GMMEstimatorScipy(GMMEstimator):
 class GMMEstimatorTorch(GMMEstimator):
     """Class to create GMM estimator using torch"""
 
-    def __init__(self, moment_cond, weighting_matrix="optimal", opt="torch"):
+    def __init__(self, moment_cond, weighting_matrix="optimal", backend="torch"):
         """Generalized Method of Moments Estimator in PyTorch"""
-        super().__init__(moment_cond, weighting_matrix, opt)
+        super().__init__(moment_cond, weighting_matrix, backend)
 
     def gmm_objective(self, beta):
         """

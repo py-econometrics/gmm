@@ -6,16 +6,16 @@ from gmm import GMMEstimator, GMMEstimatorTorch, GMMEstimatorScipy
 class TestGMMEstimator(unittest.TestCase):
     def test_backend_initialization(self):
         with self.subTest("Scipy backend"):
-            estimator = GMMEstimator(None, opt="scipy")
+            estimator = GMMEstimator(None, backend="scipy")
             self.assertIsInstance(estimator, GMMEstimatorScipy)
 
         with self.subTest("Torch backend"):
-            estimator = GMMEstimator(None, opt="torch")
+            estimator = GMMEstimator(None, backend="torch")
             self.assertIsInstance(estimator, GMMEstimatorTorch)
 
         with self.subTest("Nonexistent backend"):
             with self.assertRaises(ValueError):
-                GMMEstimator(None, opt="NONEXISTENT")
+                GMMEstimator(None, backend="NONEXISTENT")
 
 
 class TestGMMEstimatorScipy(unittest.TestCase):
