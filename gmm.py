@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 import numpy as np
 import pandas as pd
 
@@ -6,14 +8,50 @@ import torch
 import torchmin
 
 
-# %%
-class GMMEstimatorScipy:
-    """Class to create GMM estimator using scipy"""
+class GMMEstimator:
+    """Class to create GMM estimator using scipy or torch backend."""
+    def __new__(cls, moment_cond, weighting_matrix="optimal", opt="scipy"):
+        opt = opt.lower()
+        estimator = _BACKENDS.get(opt)
+        if estimator is None:
+            raise ValueError(
+                f"Backend {opt} is not supported. "
+                f"Supported backend are: {list(_BACKENDS.keys())}"
+            )
+        return super(GMMEstimator, cls).__new__(estimator)
 
-    def __init__(self, moment_cond, weighting_matrix="optimal"):
-        """Generalized Method of Moments Estimator with Scipy"""
+    def __init__(self, moment_cond, weighting_matrix="optimal", opt="scipy"):
         self.moment_cond = moment_cond
         self.weighting_matrix = weighting_matrix
+
+    @abstractmethod
+    def gmm_objective(self, beta):
+        raise NotImplementedError
+
+    @abstractmethod
+    def optimal_weighting_matrix(self, moments):
+        raise NotImplementedError
+
+    @abstractmethod
+    def fit(self, z, y, x, verbose=False, fit_method=None):
+        raise NotImplementedError
+
+    @abstractmethod
+    def jacobian_moment_cond(self):
+        raise NotImplementedError
+
+    def summary(self):
+        return pd.DataFrame(
+            {"coef": self.estimator.theta, "std err": self.estimator.std_errors}
+        )
+
+
+class GMMEstimatorScipy(GMMEstimator):
+    """Class to create GMM estimator using scipy"""
+
+    def __init__(self, moment_cond, weighting_matrix="optimal", opt="scipy"):
+        """Generalized Method of Moments Estimator with Scipy"""
+        super().__init__(moment_cond, weighting_matrix, opt)
 
     def gmm_objective(self, beta):
         """
@@ -61,13 +99,12 @@ class GMMEstimatorScipy:
 
 
 # %%
-class GMMEstimatorTorch:
+class GMMEstimatorTorch(GMMEstimator):
     """Class to create GMM estimator using torch"""
 
-    def __init__(self, moment_cond, weighting_matrix="optimal"):
+    def __init__(self, moment_cond, weighting_matrix="optimal", opt="torch"):
         """Generalized Method of Moments Estimator in PyTorch"""
-        self.moment_cond = moment_cond
-        self.weighting_matrix = weighting_matrix
+        super().__init__(moment_cond, weighting_matrix, opt)
 
     def gmm_objective(self, beta):
         """
@@ -130,36 +167,10 @@ class GMMEstimatorTorch:
         return self.jac_est
 
 
-# %%
-class GMMEstimator:
-    """Class to create GMM estimator using scipy or torch backend."""
-
-    def __init__(self, moment_cond, weighting_matrix="optimal", opt="scipy"):
-        self.estimator = self._create_GMMEstimator(moment_cond, weighting_matrix, opt)
-
-    def gmm_objective(self, beta):
-        return self.estimator.gmm_objective(beta)
-
-    def optimal_weighting_matrix(self, moments):
-        return self.estimator.optimal_weighting_matrix(moments)
-
-    def fit(self, z, y, x, verbose=False, fit_method=None):
-        self.estimator.fit(z, y, x, verbose, fit_method)
-
-    def jacobian_moment_cond(self):
-        return self.estimator.jacobian_moment_cond()
-
-    def summary(self):
-        return pd.DataFrame(
-            {"coef": self.estimator.theta, "std err": self.estimator.std_errors}
-        )
-
-    def _create_GMMEstimator(self, moment_cond, weighting_matrix, opt):
-        if opt == "scipy":
-            return GMMEstimatorScipy(moment_cond, weighting_matrix)
-        elif opt == "torch":
-            return GMMEstimatorTorch(moment_cond, weighting_matrix)
-
+_BACKENDS = {
+    "scipy": GMMEstimatorScipy,
+    "torch": GMMEstimatorTorch,
+}
 
 # %% moment conditions to pass to GMM class
 def iv_moment_pytorch(z, y, x, beta):
