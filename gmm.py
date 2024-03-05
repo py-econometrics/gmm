@@ -41,8 +41,13 @@ class GMMEstimator:
         raise NotImplementedError
 
     def summary(self):
+        if not hasattr(self, "theta_") and not hasattr(self, "std_errors_"):
+            raise AttributeError(
+                "Attributes `theta_` and `std_errors_` do not exist. "
+                "Make sure you called `fit()` before `summary()`."
+            )
         return pd.DataFrame(
-            {"coef": self.estimator.theta, "std err": self.estimator.std_errors}
+            {"coef": self.theta_, "std err": self.std_errors_}
         )
 
 
