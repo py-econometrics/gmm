@@ -102,6 +102,11 @@ class GMMEstimatorScipy(GMMEstimator):
         self.jac_est_ = -self.z_.T @ self.x_
         return self.jac_est_
 
+    @staticmethod
+    def iv_moment(z, y, x, beta):
+        """Linear IV moment condition in numpy"""
+        return z * (y - x @ beta)[:, np.newaxis]
+
 
 # %%
 class GMMEstimatorTorch(GMMEstimator):
@@ -171,21 +176,14 @@ class GMMEstimatorTorch(GMMEstimator):
         )
         return self.jac_est_
 
+    @staticmethod
+    def iv_moment(z, y, x, beta):
+        """Linear IV moment condition in torch"""
+        return z * (y - x @ beta).unsqueeze(-1)
+
 
 _BACKENDS = {
     "scipy": GMMEstimatorScipy,
     "torch": GMMEstimatorTorch,
 }
 
-# %% moment conditions to pass to GMM class
-def iv_moment_pytorch(z, y, x, beta):
-    """Linear IV moment condition in torch"""
-    return z * (y - x @ beta).unsqueeze(-1)
-
-
-def iv_moment_numpy(z, y, x, beta):
-    """Linear IV moment condition in numpy"""
-    return z * (y - x @ beta)[:, np.newaxis]
-
-
-# %%
