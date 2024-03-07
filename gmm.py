@@ -10,6 +10,7 @@ import torchmin
 
 class GMMEstimator:
     """Class to create GMM estimator using scipy or torch backend."""
+
     def __new__(cls, moment_cond, weighting_matrix="optimal", backend="scipy"):
         backend = backend.lower()
         estimator = _BACKENDS.get(backend)
@@ -33,21 +34,23 @@ class GMMEstimator:
         raise NotImplementedError
 
     @abstractmethod
-    def fit(self, z, y, x, verbose=False, fit_method=None):
+    def fit(self, z, y, x, verbose=False, fit_method=None, iid=True):
         raise NotImplementedError
 
     @abstractmethod
     def jacobian_moment_cond(self):
         raise NotImplementedError
 
-    def summary(self):
+    def summary(self, prec=4):
         if not hasattr(self, "theta_") and not hasattr(self, "std_errors_"):
-            raise AttributeError(
-                "Attributes `theta_` and `std_errors_` do not exist. "
-                "Make sure you called `fit()` before `summary()`."
+            raise ValueError(
+                "Estimator not fitted yet. Make sure you call `fit()` before `summary()`."
             )
         return pd.DataFrame(
-            {"coef": self.theta_, "std err": self.std_errors_}
+            {
+                "coef": np.round(self.theta_, prec),
+                "std err": np.round(self.std_errors_, prec),
+            }
         )
 
 
@@ -76,7 +79,7 @@ class GMMEstimatorScipy(GMMEstimator):
         """
         return np.linalg.inv((1 / self.n_) * (moments.T @ moments))
 
-    def fit(self, z, y, x, verbose=False, fit_method=None):
+    def fit(self, z, y, x, verbose=False, fit_method=None, iid=True):
         if fit_method is None:
             fit_method = "L-BFGS-B"
         self.z_, self.y_, self.x_ = z, y, x
@@ -92,8 +95,19 @@ class GMMEstimatorScipy(GMMEstimator):
         # Standard error calculation
         try:
             self.Gamma_ = self.jacobian_moment_cond()
-            self.vθ_ = np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
-            self.std_errors_ = np.sqrt(self.n_ * np.diag(self.vθ_))
+            if iid:
+                self.vtheta_ = np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
+            else:
+                self.vtheta_ = (
+                    np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
+                    @ self.Gamma_.T
+                    @ self.W_
+                    @ self.Omega_
+                    @ self.W_
+                    @ self.Gamma_
+                    @ np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
+                )
+            self.std_errors_ = np.sqrt(self.n_ * np.diag(self.vtheta_))
         except:
             self.std_errors_ = None
 
@@ -137,7 +151,7 @@ class GMMEstimatorTorch(GMMEstimator):
         """
         return torch.inverse((1 / self.n_) * torch.matmul(moments.T, moments))
 
-    def fit(self, z, y, x, verbose=False, fit_method=None):
+    def fit(self, z, y, x, verbose=False, fit_method=None, iid=True):
         if fit_method is None:
             fit_method = "l-bfgs"
         # minimize blackbox using pytorch
@@ -159,9 +173,21 @@ class GMMEstimatorTorch(GMMEstimator):
 
         # Standard error calculation
         try:
+            self.Omega_ = np.linalg.inv(self.W_)
             self.Gamma_ = self.jacobian_moment_cond()
-            self.vθ_ = np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
-            self.std_errors_ = np.sqrt(self.n_ * np.diag(self.vθ_))
+            if iid:
+                self.vtheta_ = np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
+            else:
+                self.vtheta_ = (
+                    np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
+                    @ self.Gamma_.T
+                    @ self.W_
+                    @ self.Omega_
+                    @ self.W_
+                    @ self.Gamma_
+                    @ np.linalg.inv(self.Gamma_.T @ self.W_ @ self.Gamma_)
+                )
+            self.std_errors_ = np.sqrt(self.n_ * np.diag(self.vtheta_))
         except:
             self.std_errors_ = None
 
@@ -172,7 +198,10 @@ class GMMEstimatorTorch(GMMEstimator):
         # forward mode automatic differentiation wrt 3rd arg (parameter vector)
         self.jac_ = torch.func.jacfwd(self.moment_cond, argnums=3)
         self.jac_est_ = (
-            self.jac_(self.z_, self.y_, self.x_, self.theta_).sum(axis=0).detach().numpy()
+            self.jac_(self.z_, self.y_, self.x_, self.theta_)
+            .sum(axis=0)
+            .detach()
+            .numpy()
         )
         return self.jac_est_
 
@@ -186,4 +215,3 @@ _BACKENDS = {
     "scipy": GMMEstimatorScipy,
     "torch": GMMEstimatorTorch,
 }
-
