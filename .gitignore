@@ -1,4 +1,5 @@
 scratch.ipynb
+gmm.egg-info/*
 __pycache__/*
 *.csv
 *.dta
