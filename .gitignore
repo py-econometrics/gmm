@@ -29,3 +29,5 @@ __pycache__/*
 *.blg
 *.out
 *.synctex.gz
+gmm/__pycache__/__init__.cpython-311.pyc
+gmm/__pycache__/gmm.cpython-311.pyc

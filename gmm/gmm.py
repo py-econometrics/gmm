@@ -41,7 +41,7 @@ class GMMEstimator:
     def jacobian_moment_cond(self):
         raise NotImplementedError
 
-    def summary(self, prec=4):
+    def summary(self, prec=4, alpha=0.05):
         if not hasattr(self, "theta_") and not hasattr(self, "std_errors_"):
             raise ValueError(
                 "Estimator not fitted yet. Make sure you call `fit()` before `summary()`."
@@ -50,6 +50,24 @@ class GMMEstimator:
             {
                 "coef": np.round(self.theta_, prec),
                 "std err": np.round(self.std_errors_, prec),
+                "t": np.round(self.theta_ / self.std_errors_, prec),
+                "p-value": np.round(
+                    2
+                    * (
+                        1 - scipy.stats.norm.cdf(np.abs(self.theta_ / self.std_errors_))
+                    ),
+                    prec,
+                ),
+                f"[{alpha/2}": np.round(
+                    self.theta_
+                    - scipy.stats.norm.ppf(1 - alpha / 2) * self.std_errors_,
+                    prec,
+                ),
+                f"{1 - alpha/2}]": np.round(
+                    self.theta_
+                    + scipy.stats.norm.ppf(1 - alpha / 2) * self.std_errors_,
+                    prec,
+                ),
             }
         )
 
