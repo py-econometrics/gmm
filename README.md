@@ -6,7 +6,7 @@
 Functions to solve for parameters $\theta$ defined as solutions to moment conditions / estimating equations
 $$E[g(Z; \theta)] = 0$$
 
-for some function $g(Z; \theta)$ of the data $Z$, which is typically a matrix of residuals (hence has expectation 0 in each column). Common examples include $g(\theta) = X(y - X\theta)$ for OLS and $g(\theta) = z(y - X\theta)$ for IV.
+for some function $g(Z; \theta)$ of the data $Z$, which is typically a matrix of residuals (hence has expectation 0 in each column). Common examples include $g(\theta) = X(y - X\theta)$ for OLS and $g(\theta) = z(y - X\theta)$ for IV. This is a remarkably flexible approach to performing estimation and inference without making strong distributional assumptions about the data, and underpins many of the most widely-used estimators in econometrics.
 
 Look in the `notebooks/` directory for examples of how to use the library.
 
@@ -50,12 +50,14 @@ where $\rho$ is a smooth scalar function that satisfies $\rho(0) = 0, \partial\r
 
 + [X] Support numerical optimization via [pytorch-minimize](https://github.com/rfeinman/pytorch-minimize)
 + [X] Support Empirical Likelihood and Generalized Empirical Likelihood
-+ [ ] Support Bayesian Bootstrap with exponential(1) weights for inference
-+ [ ] Refactor GMM estimators to accept a single data argument instead of separate X, y, z, etc.
++ [ ] Support bootstrapping influence functions ('fast bootstrap') for inference
++ [ ] Support for autodiff-based gradients in `GEL`
++ [ ] Refactor `GMM` estimators to accept a single data argument instead of separate X, y, z, etc.
 
 ## References
-+ [Newey and McFadden (1994)](https://users.ssc.wisc.edu/~xshi/econ715/chap36neweymacfadden.pdf)
 + Microeconometrics [Chapter 6], Cameron and Trivedi
 + Guido Imbens' lectures - [public version](https://www.nber.org/sites/default/files/2022-09/slides_15_el.pdf)
 + Anatolyev and Gospodinov, Methods for Estimation and Inference in Modern Econometrics
 + Owen, Empirical Likelihood
++ __here be gremlins__: [Newey and McFadden (1994)](https://users.ssc.wisc.edu/~xshi/econ715/chap36neweymacfadden.pdf)
++ __here be dragons__ :Van Der Vaart, Asymptotic Statistics

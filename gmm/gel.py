@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 from typing import Callable
+import logging
 
 
 # tilt functions
@@ -25,11 +26,21 @@ class GELEstimator:
     """
 
     def __init__(
-        self, m: Callable, rho: Callable = rho_exponential, min_method: str = "SLSQP"
+        self,
+        m: Callable,
+        rho: Callable = rho_exponential,
+        min_method: str = "L-BFGS-B",
+        verbose=False,
+        log=False,
     ):
         self.m = m
         self.rho = rho
         self._min_method = min_method
+        self._verbose = verbose
+        if log:
+            logging.basicConfig(level=logging.INFO)
+        else:
+            logging.basicConfig(level=logging.WARNING)
 
     def fit(self, D, startval, startval2=None):
         """Fit GEL estimator
@@ -45,6 +56,7 @@ class GELEstimator:
             lambda theta: self._outer_maximization(theta, D, startval2),
             startval,
             method=self._min_method,
+            options={"disp": True if self._verbose else False},
         )
         # standard error
         self.est = result.x
@@ -65,10 +77,13 @@ class GELEstimator:
             startval2,
             args=(theta, D),
             method=self._min_method,
+            options={"disp": True if self._verbose else False},
         )
         return -result.fun
 
     # Objective function for the inner minimisation
     def _inner_minimisation(self, lam, theta, D):
         moments = self.m(D, theta)  # Moment conditions
-        return -np.sum(self.rho(np.dot(moments, lam)))
+        obj_value = -np.sum(self.rho(np.dot(moments, lam)))
+        logging.info(f"Inner minimisation: lam={lam}, Objective value: {obj_value}")
+        return obj_value
