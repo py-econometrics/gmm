@@ -10,6 +10,13 @@ for some function $g(Z; \theta)$ of the data $Z$, which is typically a matrix of
 
 Look in the `notebooks/` directory for examples of how to use the library.
 
+## installation
+
+```
+pip install git+https://github.com/py-econometrics/gmm
+```
+
+
 ## `gmm.GMMEstimator`
 
 solves for a k-dimensional parameter $\theta$ are defined by solving the following optimization problem
