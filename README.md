@@ -63,8 +63,11 @@ where $\rho$ is a smooth scalar function that satisfies $\rho(0) = 0, \partial\r
 
 ## References
 + Microeconometrics [Chapter 6], Cameron and Trivedi
++ [Imbens, Generalized Method of Moments and Empirical Likelihood](https://scholar.harvard.edu/imbens/files/generalized_method_of_moments_and_empirical_likelihood.pdf)
+
 + Guido Imbens' lectures - [public version](https://www.nber.org/sites/default/files/2022-09/slides_15_el.pdf)
 + Anatolyev and Gospodinov, Methods for Estimation and Inference in Modern Econometrics
 + Owen, Empirical Likelihood
++ [Newey and Smith, Higher Order Properties of GMM and Generalized Empirical Likelihood Estimators](https://www.ma.imperial.ac.uk/~das01/GSACourse/NeweySmith2004.pdf)
 + __here be gremlins__: [Newey and McFadden (1994)](https://users.ssc.wisc.edu/~xshi/econ715/chap36neweymacfadden.pdf)
 + __here be dragons__ :Van Der Vaart, Asymptotic Statistics
