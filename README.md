@@ -22,19 +22,19 @@ pip install git+https://github.com/py-econometrics/gmm
 solves for a k-dimensional parameter $\theta$ are defined by solving the following optimization problem
 
 $$
-\hat{\theta} = \text{argmin}_{\theta}  \left(n^{-1} \sum_i g(Z, \theta)' \right) \mathbf{W} \left(n^{-1}  \sum_i  g(Z, \theta)' \right)
+\hat{\theta} = \text{argmin}_{\theta}  \left(n^{-1} \sum_i g(Z, \theta)' \right) \mathbf{W} \left(n^{-1}  \sum_i  g(Z, \theta \right)
 $$
 
 for a moment condition $g(\cdot)$ and a $m \times m$ weight matrix $\mathbf{W}$.
 For a just-identified problem (M = K), the choice of the weight matrix $\mathbf{W}$ does not matter. For over-identified problems (M > K), it does. Hansen(1982) covers the details and won him the Nobel prize.
 
-Supports both  `scipy.optimize.minimize` and [`pytorch.minimize`](https://pytorch-minimize.readthedocs.io/en/latest/api/index.html#functional-api) to solve the GMM for just- and over-identified problems (with Identity or Optimal weight matrix) and computes HAC-robust standard errors. See OLS and IV examples in `example.ipynb`.
+Supports both  `scipy.optimize.minimize` and [`pytorch.minimize`](https://pytorch-minimize.readthedocs.io/en/latest/api/index.html#functional-api) to solve the GMM for just- and over-identified problems (with Identity or Optimal weight matrix) and computes HAC-robust standard errors. See OLS and IV examples in `example.ipynb`, and several maximum likelihood examples in `maximum_likelihood.ipynb`. 
 
 The scipy optimizer uses an analytic expression for the jacobian of linear moment conditions, while the `pytorch.minimize` version uses forward-mode autodiff and therefore supports both linear and non-linear moment conditions.
 
 ## `gmm.GELEstimator`
 
-Solves the same category of problem using generalized empirical likelihood (Exponential tilting by default, but also supports CUE) by solving the following optimization problem
+Solves the same category of problem using generalized empirical likelihood (Exponential tilting by default, but also supports EL and CUE) by solving the following optimization problem
 
 $$
 \min_{\pi, \theta} I_{\lambda}(\iota / N, \pi) \; \text{subject to} \; \sum_{i} \pi_i g(Z; \theta) = 0 \; \text{ and } \; \sum_i \pi_i = 1
