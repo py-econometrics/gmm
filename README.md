@@ -13,8 +13,10 @@ Look in the `notebooks/` directory for examples of how to use the library.
 ## installation
 
 ```
-pip install git+https://github.com/py-econometrics/gmm
+pip install git+https://github.com/py-econometrics/gmm --extra-index-url https://download.pytorch.org/whl/cpu
 ```
+
+where the `--extra-index-url` sources  the `torch` dependency. Swap it for the GPU version if you have a CUDA-compatible GPU.
 
 
 ## `gmm.GMMEstimator`
@@ -28,7 +30,7 @@ $$
 for a moment condition $g(\cdot)$ and a $m \times m$ weight matrix $\mathbf{W}$.
 For a just-identified problem (M = K), the choice of the weight matrix $\mathbf{W}$ does not matter. For over-identified problems (M > K), it does. Hansen(1982) covers the details and won him the Nobel prize.
 
-Supports both  `scipy.optimize.minimize` and [`pytorch.minimize`](https://pytorch-minimize.readthedocs.io/en/latest/api/index.html#functional-api) to solve the GMM for just- and over-identified problems (with Identity or Optimal weight matrix) and computes HAC-robust standard errors. See OLS and IV examples in `example.ipynb`, and several maximum likelihood examples in `maximum_likelihood.ipynb`. 
+Supports both  `scipy.optimize.minimize` and [`pytorch.minimize`](https://pytorch-minimize.readthedocs.io/en/latest/api/index.html#functional-api) to solve the GMM for just- and over-identified problems (with Identity or Optimal weight matrix) and computes HAC-robust standard errors. See OLS and IV examples in `example.ipynb`, and several maximum likelihood examples in `maximum_likelihood.ipynb`.
 
 The scipy optimizer uses an analytic expression for the jacobian of linear moment conditions, while the `pytorch.minimize` version uses forward-mode autodiff and therefore supports both linear and non-linear moment conditions.
 
