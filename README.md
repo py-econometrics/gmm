@@ -24,7 +24,7 @@ where the `--extra-index-url` sources  the `torch` dependency. Swap it for the G
 solves for a k-dimensional parameter $\theta$ are defined by solving the following optimization problem
 
 $$
-\hat{\theta} = \text{argmin}_{\theta}  \left(n^{-1} \sum_i g(Z, \theta)' \right) \mathbf{W} \left(n^{-1}  \sum_i  g(Z, \theta \right)
+\hat{\theta} = \text{argmin}_{\theta}  \left(n^{-1} \sum_i g(Z, \theta)' \right) \mathbf{W} \left(n^{-1}  \sum_i  g(Z, \theta) \right)
 $$
 
 for a moment condition $g(\cdot)$ and a $m \times m$ weight matrix $\mathbf{W}$.
@@ -67,7 +67,9 @@ where $\rho$ is a smooth scalar function that satisfies $\rho(0) = 0, \partial\r
 + Microeconometrics [Chapter 6], Cameron and Trivedi
 + [Imbens, Generalized Method of Moments and Empirical Likelihood](https://scholar.harvard.edu/imbens/files/generalized_method_of_moments_and_empirical_likelihood.pdf)
 
-+ Guido Imbens' lectures - [public version](https://www.nber.org/sites/default/files/2022-09/slides_15_el.pdf)
++ Guido Imbens' lectures
+  - [slides](https://www.nber.org/sites/default/files/2022-09/slides_15_el.pdf)
+  - [notes](https://users.nber.org/~confer/2007/si2007/WNE/lect_15_el.pdf)
 + Anatolyev and Gospodinov, Methods for Estimation and Inference in Modern Econometrics
 + Owen, Empirical Likelihood
 + [Newey and Smith, Higher Order Properties of GMM and Generalized Empirical Likelihood Estimators](https://www.ma.imperial.ac.uk/~das01/GSACourse/NeweySmith2004.pdf)
